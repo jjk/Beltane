@@ -79,7 +79,6 @@ namespace
 {
     Stroke *corner = [strokes strokeAt: Strokes::Corner];
 
-    // Draw corners of the section if needed.
     if (section.leftTop() == 'D') {
         [self drawStroke: corner transformed: 0 inRect: rect operation: op];
     }
@@ -187,14 +186,14 @@ namespace
                       inRect: (NSRect)rect
 {
     // Draw bottom stroke.
-    if (mHollow) {
-        [self drawDiagonalStrokeFromSet: [mpStyle outline]
-                                   from: section.rightTop()
-                                     to: section.leftBottom()
-                               mirrored: true
-                                 inRect: rect
-                              operation: NSCompositeSourceOver];
-    }
+    [self drawDiagonalStrokeFromSet: [mpStyle outline]
+                               from: section.rightTop()
+                                 to: section.leftBottom()
+                           mirrored: true
+                             inRect: rect
+                          operation: (mHollow
+                                      ? NSCompositeSourceOver
+                                      : NSCompositeDestinationOut)];
     [self drawDiagonalStrokeFromSet: [mpStyle fill]
                                from: section.rightTop()
                                  to: section.leftBottom()
@@ -308,14 +307,14 @@ namespace
                         inRect: (NSRect)rect
 {
     // Draw bottom stroke.
-    if (mHollow) {
-        [self drawHorizontalStrokeFromSet: [mpStyle outline]
-                                     from: section.leftBottom()
-                                       to: section.rightBottom()
-                                 mirrored: true
-                                   inRect: rect
-                                operation: NSCompositeSourceOver];
-    }
+    [self drawHorizontalStrokeFromSet: [mpStyle outline]
+                                 from: section.leftBottom()
+                                   to: section.rightBottom()
+                             mirrored: true
+                               inRect: rect
+                            operation: (mHollow
+                                        ? NSCompositeSourceOver
+                                        : NSCompositeDestinationOut)];
     [self drawHorizontalStrokeFromSet: [mpStyle fill]
                                  from: section.leftBottom()
                                    to: section.rightBottom()
@@ -324,16 +323,15 @@ namespace
                             operation: (mHollow
                                         ? NSCompositeDestinationOut
                                         : NSCompositeSourceOver)];
-
     // Draw top stroke.
-    if (mHollow) {
-        [self drawHorizontalStrokeFromSet: [mpStyle outline]
-                                     from: section.leftTop()
-                                       to: section.rightTop()
-                                 mirrored: false
-                                   inRect: rect
-                                operation: NSCompositeSourceOver];
-    }
+    [self drawHorizontalStrokeFromSet: [mpStyle outline]
+                                 from: section.leftTop()
+                                   to: section.rightTop()
+                             mirrored: false
+                               inRect: rect
+                            operation: (mHollow
+                                        ? NSCompositeSourceOver
+                                        : NSCompositeDestinationOut)];
     [self drawHorizontalStrokeFromSet: [mpStyle fill]
                                  from: section.leftTop()
                                    to: section.rightTop()
@@ -430,14 +428,14 @@ namespace
                       inRect: (NSRect)rect
 {
     // Draw right stroke.
-    if (mHollow) {
-        [self drawVerticalStrokeFromSet: [mpStyle outline]
-                                   from: section.rightTop()
-                                     to: section.rightBottom()
-                               mirrored: true
-                                 inRect: rect
-                              operation: NSCompositeSourceOver];
-    }
+    [self drawVerticalStrokeFromSet: [mpStyle outline]
+                               from: section.rightTop()
+                                 to: section.rightBottom()
+                           mirrored: true
+                             inRect: rect
+                          operation: (mHollow
+                                      ? NSCompositeSourceOver
+                                      : NSCompositeDestinationOut)];
     [self drawVerticalStrokeFromSet: [mpStyle fill]
                                from: section.rightTop()
                                  to: section.rightBottom()
@@ -446,16 +444,15 @@ namespace
                           operation: (mHollow
                                       ? NSCompositeDestinationOut
                                       : NSCompositeSourceOver)];
-
     // Draw left stroke.
-    if (mHollow) {
-        [self drawVerticalStrokeFromSet: [mpStyle outline]
-                                   from: section.leftTop()
-                                     to: section.leftBottom()
-                               mirrored: false
-                                 inRect: rect
-                              operation: NSCompositeSourceOver];
-    }
+    [self drawVerticalStrokeFromSet: [mpStyle outline]
+                               from: section.leftTop()
+                                 to: section.leftBottom()
+                           mirrored: false
+                             inRect: rect
+                          operation: (mHollow
+                                      ? NSCompositeSourceOver
+                                      : NSCompositeDestinationOut)];
     [self drawVerticalStrokeFromSet: [mpStyle fill]
                                from: section.leftTop()
                                  to: section.leftBottom()

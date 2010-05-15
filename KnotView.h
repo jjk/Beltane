@@ -24,11 +24,15 @@
 
 @class KnotDocument;
 @class KnotEngine;
-#import "KnotSection.h"
+#include "KnotSection.h"
+@class KnotStyle;
 
 @interface KnotView : NSView
 {
     IBOutlet KnotDocument *document;
+
+    KnotStyle *style;
+    bool hollow;
 
     CGFloat sectionSize;
     KnotEngine *engine;
@@ -37,8 +41,8 @@
     bool selCorner;
 }
 
-- (IBAction) zoomIn: (id)sender;
-- (IBAction) zoomOut: (id)sender;
+- (IBAction) toggleStyle: (id)sender;
+- (IBAction) zoom: (id)sender;
 
 @end
 

@@ -47,13 +47,20 @@ namespace
     }
 }
 
+- (void) appearanceChanged
+{
+    engine = [[KnotEngine alloc] initWithStyle: style hollow: hollow];
+    [self setNeedsDisplay: YES];
+}
+
 - (id) initWithFrame: (NSRect)frame
 {
     self = [super initWithFrame: frame];
     if (self) {
+        style = kpSlenderStyle;
+        hollow = false;
         sectionSize = kInitialSectionSize;
-        engine = [[KnotEngine alloc] initWithStyle: kpSlenderStyle
-                                            hollow: true];
+        [self appearanceChanged];
 
         selX = selY = 0;
         selCorner = false;
@@ -134,15 +141,57 @@ namespace
     return YES;
 }
 
-- (IBAction) zoomIn: (id)sender
+- (BOOL) validateMenuItem: (NSMenuItem *)menuItem
 {
-    sectionSize *= kZoomFactor;
-    [self setNeedsDisplay: YES];
+    SEL action = [menuItem action];
+
+    if (action == @selector(toggleStyle:)) {
+        NSInteger state = NSOffState;
+
+        switch ([menuItem tag]) {
+
+        case 0: // "Broad Strokes"
+            state = (style == kpBroadStyle) ? NSOnState : NSOffState;
+            break;
+
+        case 1: // "Hollow Strokes"
+            state = hollow ? NSOnState : NSOffState;
+            break;
+        }
+
+        [menuItem setState: state];
+    }
+
+    return YES;
 }
 
-- (IBAction) zoomOut: (id)sender
+- (IBAction) toggleStyle: (id)sender;
 {
-    sectionSize = max(sectionSize / kZoomFactor, kMinimumSectionSize);
+    switch ([sender tag]) {
+
+    case 0: // "Broad Strokes"
+        style = (style == kpSlenderStyle) ? kpBroadStyle : kpSlenderStyle;
+        break;
+
+    case 1: // "Hollow Strokes"
+        hollow = !hollow;
+        break;
+    }
+    [self appearanceChanged];
+}
+
+- (IBAction) zoom: (id)sender
+{
+    switch ([sender tag]) {
+
+    case 0: // "Zoom In"
+        sectionSize *= kZoomFactor;
+        break;
+
+    case 1: // "Zoom Out"
+        sectionSize = max(sectionSize / kZoomFactor, kMinimumSectionSize);
+        break;
+    }
     [self setNeedsDisplay: YES];
 }
 

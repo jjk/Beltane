@@ -23,6 +23,16 @@
 #include <cstring>
 using namespace ::std;
 
+namespace
+{
+    const NSString *kVersionKey      = @"KnotVersion";
+    const NSString *kMinXKey         = @"KnotMinX";
+    const NSString *kMaxXKey         = @"KnotMaxX";
+    const NSString *kMinYKey         = @"KnotMinY";
+    const NSString *kMaxYKey         = @"KnotMaxY";
+    const NSString *kSectionTypesKey = @"KnotSectionTypes";
+    const NSString *kCornerTypesKey  = @"KnotCornerTypes";
+}
 @implementation KnotDocument
 
 - (id)init
@@ -160,68 +170,80 @@ using namespace ::std;
     // Add any code here that needs to be executed once the windowController has loaded the document's window.
 }
 
-- (BOOL) writeToURL: (NSURL *)absoluteURL ofType: (NSString *)typeName error: (NSError **)outError
+- (NSData *) dataOfType: (NSString *)typeName error: (NSError **)outError
 {
     int width = self.width;
     int height = self.height;
 
-    // TODO - use NSKeyedArchiver
-    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:
-                          [NSNumber numberWithInt: minX],   @"minX",
-                          [NSNumber numberWithInt: maxX],   @"maxX",
-                          [NSNumber numberWithInt: minY],   @"minY",
-                          [NSNumber numberWithInt: maxY],   @"maxY",
-                          [NSData dataWithBytesNoCopy: sectionTypes
-                                               length: width * height
-                                         freeWhenDone: NO], @"sectionTypes",
-                          [NSData dataWithBytesNoCopy: cornerTypes
-                                               length: (width+1) * (height+1)
-                                         freeWhenDone: NO], @"cornerTypes",
-                          NULL];
+    NSMutableData *data = [NSMutableData data];
+    NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc]
+                                 initForWritingWithMutableData: data];
 
-    BOOL result = [dict writeToURL: absoluteURL atomically: YES];
+    [archiver encodeInt: 0 forKey: kVersionKey];
 
-    if (!result) {
-        if (outError != NULL) {
-            *outError = [NSError errorWithDomain: NSOSStatusErrorDomain code: ioErr userInfo: NULL];
-	}
-    }
+    [archiver encodeInt: minX forKey: kMinXKey];
+    [archiver encodeInt: maxX forKey: kMaxXKey];
+    [archiver encodeInt: minY forKey: kMinYKey];
+    [archiver encodeInt: maxY forKey: kMaxYKey];
 
-    return result;
+    [archiver encodeBytes: (uint8_t *)sectionTypes
+                   length: width * height
+                   forKey: kSectionTypesKey];
+    [archiver encodeBytes: (uint8_t *)cornerTypes
+                   length: (width+1) * (height+1)
+                   forKey: kCornerTypesKey];
+
+    [archiver finishEncoding];
+    return data;
 }
 
-- (BOOL) readFromURL: (NSURL *)absoluteURL ofType: (NSString *)typeName error: (NSError **)outError
+- (BOOL) readFromData: (NSData *)data ofType: (NSString *)typeName error: (NSError **)outError
 {
     BOOL result = YES;
 
-    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfURL: absoluteURL];
-    if (dict != nil) {
-        minX = [[dict objectForKey: @"minX"] intValue];
-        maxX = [[dict objectForKey: @"maxX"] intValue];
-        minY = [[dict objectForKey: @"minY"] intValue];
-        maxY = [[dict objectForKey: @"maxY"] intValue];
+    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc]
+                                     initForReadingWithData: data];
+
+    if ([unarchiver decodeIntForKey: kVersionKey] == 0) {
+        minX = [unarchiver decodeIntForKey: kMinXKey];
+        maxX = [unarchiver decodeIntForKey: kMaxXKey];
+        minY = [unarchiver decodeIntForKey: kMinYKey];
+        maxY = [unarchiver decodeIntForKey: kMaxYKey];
 
         int newWidth = self.width;
         int newHeight = self.height;
+        NSUInteger length;
+        const uint8_t *bytes;
 
         int newSectionSize = newWidth * newHeight;
         char *newSectionTypes = new char[newSectionSize];
-        [[dict objectForKey: @"sectionTypes"] getBytes: newSectionTypes
-                                                length: newSectionSize];
-
-        int newCornerSize = (newWidth+1) * (newHeight+1);
-        char *newCornerTypes  = new char[newCornerSize];
-        [[dict objectForKey: @"cornerTypes"] getBytes: newCornerTypes
-                                                length: newCornerSize];
-
+        bytes = [unarchiver decodeBytesForKey: kSectionTypesKey
+                               returnedLength: &length];
+        if (length == newSectionSize) {
+            memcpy(newSectionTypes, bytes, length);
+        } else {
+            result = NO;
+        }
         delete [] sectionTypes;
         sectionTypes = newSectionTypes;
+
+        int newCornerSize = (newWidth+1) * (newHeight+1);
+        char *newCornerTypes = new char[newCornerSize];
+        bytes = [unarchiver decodeBytesForKey: kCornerTypesKey
+                               returnedLength: &length];
+        if (length == newCornerSize) {
+            memcpy(newCornerTypes, bytes, length);
+        } else {
+            result = NO;
+        }
         delete [] cornerTypes;
         cornerTypes = newCornerTypes;
 
     } else {
         result = NO;
     }
+
+    [unarchiver finishDecoding];
 
     if (!result) {
         if (outError != NULL) {

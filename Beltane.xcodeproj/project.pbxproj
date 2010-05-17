@@ -52,6 +52,7 @@
 		00731A77119D464700AB0431 /* slender_outline_HHH.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 00731A4B119D464700AB0431 /* slender_outline_HHH.pdf */; };
 		00731A78119D464700AB0431 /* slender_outline_HHV.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 00731A4C119D464700AB0431 /* slender_outline_HHV.pdf */; };
 		00731A79119D464700AB0431 /* slender_outline_HVV.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 00731A4D119D464700AB0431 /* slender_outline_HVV.pdf */; };
+		00EAF83F11A1BCD400FC1AA2 /* KnotModel.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EAF83E11A1BCD400FC1AA2 /* KnotModel.mm */; };
 		00EC4969119755A30033AA22 /* KnotView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EC4968119755A30033AA22 /* KnotView.mm */; };
 		00EE7D78119DA7DE001EF433 /* KnotStyle.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EE7D72119DA7DE001EF433 /* KnotStyle.mm */; };
 		00EE7D79119DA7DE001EF433 /* Stroke.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EE7D75119DA7DE001EF433 /* Stroke.mm */; };
@@ -110,6 +111,8 @@
 		00731A4C119D464700AB0431 /* slender_outline_HHV.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = slender_outline_HHV.pdf; sourceTree = "<group>"; };
 		00731A4D119D464700AB0431 /* slender_outline_HVV.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = slender_outline_HVV.pdf; sourceTree = "<group>"; };
 		00E46160119705F90042D5E1 /* KnotSection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KnotSection.h; sourceTree = "<group>"; };
+		00EAF83D11A1BCD400FC1AA2 /* KnotModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KnotModel.h; sourceTree = "<group>"; };
+		00EAF83E11A1BCD400FC1AA2 /* KnotModel.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KnotModel.mm; sourceTree = "<group>"; };
 		00EC4967119755A30033AA22 /* KnotView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KnotView.h; sourceTree = "<group>"; };
 		00EC4968119755A30033AA22 /* KnotView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = KnotView.mm; sourceTree = "<group>"; };
 		00EE7D70119DA7A9001EF433 /* KnotEngine.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = KnotEngine.mm; sourceTree = "<group>"; };
@@ -259,6 +262,8 @@
 			children = (
 				2A37F4AEFDCFA73011CA2CEA /* KnotDocument.h */,
 				2A37F4ACFDCFA73011CA2CEA /* KnotDocument.mm */,
+				00EAF83D11A1BCD400FC1AA2 /* KnotModel.h */,
+				00EAF83E11A1BCD400FC1AA2 /* KnotModel.mm */,
 				00EC4967119755A30033AA22 /* KnotView.h */,
 				00EC4968119755A30033AA22 /* KnotView.mm */,
 			);
@@ -402,6 +407,7 @@
 				00EE7D79119DA7DE001EF433 /* Stroke.mm in Sources */,
 				00EE7D7A119DA7DE001EF433 /* StrokeSet.mm in Sources */,
 				00671F17119DCEFF0030788D /* KnotEngine.mm in Sources */,
+				00EAF83F11A1BCD400FC1AA2 /* KnotModel.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

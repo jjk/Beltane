@@ -1,4 +1,4 @@
-//  Document representation of a knot.
+//  Object holding the representation of a knot.
 //
 //  Copyright © 2010  Jens Kilian
 //
@@ -17,25 +17,34 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Beltane.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef KNOTDOCUMENT_H
-#define KNOTDOCUMENT_H
+#ifndef KNOTMODEL_H
+#define KNOTMODEL_H
 
 #import <Cocoa/Cocoa.h>
 
 #import "KnotSection.h"
 
-@class KnotModel;
-@class KnotView;
-
-@interface KnotDocument : NSDocument
+@interface KnotModel : NSObject <NSCoding>
 {
-    KnotModel *model;
+    // Current dimensions of the knot.  Can be negative.
+    int minX, maxX;
+    int minY, maxY;
 
-    IBOutlet KnotView *view;
+    // Knot data.  Addressed as two-dimensional arrays.
+    char *sectionTypes;
+    char *cornerTypes;
 }
 
-@property(readonly) KnotModel *model;
+@property(readonly) int minX, maxX, minY, maxY, width, height;
+
+- (bool) hasSectionAtX: (int)x atY: (int)y;
+
+- (KnotSection) getSectionAtX: (int)x atY: (int)y;
+
+- (void) setSectionType: (char)type atX: (int)x atY: (int)y;
+- (void) setCornerType: (char)type atX: (int)x atY: (int)y;
+
 
 @end
 
-#endif // KNOTDOCUMENT_H
+#endif // KNOTMODEL_H

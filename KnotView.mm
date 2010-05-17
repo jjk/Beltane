@@ -25,6 +25,7 @@ using namespace ::std;
 
 #import "KnotDocument.h"
 #import "KnotEngine.h"
+#import "KnotModel.h"
 #import "KnotStyle.h"
 
 namespace
@@ -115,15 +116,16 @@ namespace
                                      sectionSize,
                                      sectionSize);
 
-            int sx = (x - document.minX) % document.width;
-            sx = document.minX + sx + (sx < 0 ? document.width : 0);
-            int sy = (y - document.minY) % document.height;
-            sy = document.minY + sy + (sy < 0 ? document.height : 0);
+            KnotModel *model = document.model;
+            int sx = (x - model.minX) % model.width;
+            sx = model.minX + sx + (sx < 0 ? model.width : 0);
+            int sy = (y - model.minY) % model.height;
+            sy = model.minY + sy + (sy < 0 ? model.height : 0);
 
-            [engine drawSection: [document getSectionAtX: sx atY: sy]
+            [engine drawSection: [model getSectionAtX: sx atY: sy]
                          inRect: dest
                       operation: NSCompositeSourceOver
-                       fraction: ([document hasSectionAtX: x atY: y]
+                       fraction: ([model hasSectionAtX: x atY: y]
                                   ? 1.0
                                   : 0.5)];
         }
@@ -212,9 +214,9 @@ namespace
 
         case 'D': case 'H': case 'V': case 'N':
             if (selCorner) {
-                [document setCornerType: (char)c atX: selX atY: selY];
+                [document.model setCornerType: (char)c atX: selX atY: selY];
             } else {
-                [document setSectionType: (char)c atX: selX atY: selY];
+                [document.model setSectionType: (char)c atX: selX atY: selY];
             }
             [self setNeedsDisplay: YES];
             return;

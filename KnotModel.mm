@@ -23,6 +23,8 @@
 #include <cstring>
 using namespace ::std;
 
+#import "KnotDocument.h"
+
 namespace
 {
     const NSString *kVersionKey      = @"KnotVersion";
@@ -148,6 +150,10 @@ namespace
     return KnotSection('N', 'N', 'N', 'N', 'N');
 }
 
+@end
+
+@implementation MutableKnotModel
+
 - (void) growLeft: (int)l right: (int)r top: (int)t bottom: (int)b
 {
     int width = self.width;
@@ -186,7 +192,10 @@ namespace
     cornerTypes = newCornerTypes;
 }
 
-- (void) setSectionType: (char)type atX: (int)x atY: (int)y;
+- (void) setSectionType: (char)type
+                    atX: (int)x
+                    atY: (int)y
+                    for: (KnotDocument *)owner
 {
     if (x < minX || x > maxX || y < minY || y > maxY) {
         [self growLeft: max(0, minX - x)
@@ -197,10 +206,17 @@ namespace
 
     int dx = x - minX;
     int dy = y - minY;
-    sectionTypes[dy * self.width + dx] = type;
+    char &sectionType = sectionTypes[dy * self.width + dx];
+
+    [[[owner undoManager] prepareWithInvocationTarget: owner]
+     setSectionType: sectionType atX: x atY: y];
+    sectionType = type;
 }
 
-- (void) setCornerType: (char)type atX: (int)x atY: (int)y;
+- (void) setCornerType: (char)type
+                   atX: (int)x
+                   atY: (int)y
+                   for: (KnotDocument *)owner
 {
     if (x < minX || x > maxX+1 || y < minY || y > maxY+1) {
         [self growLeft: max(0, minX - x)
@@ -211,7 +227,11 @@ namespace
 
     int dx = x - minX;
     int dy = y - minY;
-    cornerTypes[dy * (self.width+1) + dx] = type;
+    char &cornerType = cornerTypes[dy * (self.width+1) + dx];
+
+    [[[owner undoManager] prepareWithInvocationTarget: owner]
+     setCornerType: cornerType atX: x atY: y];
+    cornerType = type;
 }
 
 @end

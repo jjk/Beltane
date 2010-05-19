@@ -22,6 +22,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class KnotDocument;
 #import "KnotSection.h"
 
 @interface KnotModel : NSObject <NSCoding>
@@ -41,9 +42,19 @@
 
 - (KnotSection) getSectionAtX: (int)x atY: (int)y;
 
-- (void) setSectionType: (char)type atX: (int)x atY: (int)y;
-- (void) setCornerType: (char)type atX: (int)x atY: (int)y;
+@end
 
+@interface MutableKnotModel : KnotModel
+
+- (void) setSectionType: (char)type
+                    atX: (int)x
+                    atY: (int)y
+                    for: (KnotDocument *)owner;
+
+- (void) setCornerType: (char)type
+                   atX: (int)x
+                   atY: (int)y
+                   for: (KnotDocument *)owner;
 
 @end
 

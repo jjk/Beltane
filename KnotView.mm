@@ -131,6 +131,7 @@ namespace
         }
     }
 
+    // TODO - draw cursor only when window is the key window
     NSBezierPath *selPath = [self selectionPath];
     [[NSColor colorWithCalibratedRed: 1.0 green: 0.6 blue: 0.6 alpha: 0.5] set];
     [selPath fill];
@@ -212,13 +213,14 @@ namespace
 
         switch (c) {
 
+        case 'X': // I keep hitting this instead of 'D' :-)
+            c = 'D';
         case 'D': case 'H': case 'V': case 'N':
             if (selCorner) {
-                [document.model setCornerType: (char)c atX: selX atY: selY];
+                [document setCornerType: (char)c atX: selX atY: selY];
             } else {
-                [document.model setSectionType: (char)c atX: selX atY: selY];
+                [document setSectionType: (char)c atX: selX atY: selY];
             }
-            [self setNeedsDisplay: YES];
             return;
         }
     }

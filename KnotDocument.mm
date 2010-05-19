@@ -30,11 +30,21 @@
 {
     self = [super init];
     if (self) {
-        [self setHasUndoManager: NO];
-
-        model = [[KnotModel alloc] init];
+        model = [[MutableKnotModel alloc] init];
     }
     return self;
+}
+
+- (void) setSectionType: (char)type atX: (int)x atY: (int)y
+{
+    [model setSectionType: type atX: x atY: y for: self];
+    [view setNeedsDisplay: YES];
+}
+
+- (void) setCornerType: (char)type atX: (int)x atY: (int)y
+{
+    [model setCornerType: type atX: x atY: y for: self];
+    [view setNeedsDisplay: YES];
 }
 
 - (NSString *) windowNibName
@@ -55,7 +65,7 @@
 
 - (BOOL) readFromData: (NSData *)data ofType: (NSString *)typeName error: (NSError **)outError
 {
-    KnotModel *newModel = [NSKeyedUnarchiver unarchiveObjectWithData: data];
+    MutableKnotModel *newModel = [NSKeyedUnarchiver unarchiveObjectWithData: data];
 
     if (newModel != nil) {
         model = newModel;

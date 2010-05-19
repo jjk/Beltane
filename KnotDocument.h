@@ -24,17 +24,21 @@
 
 #import "KnotSection.h"
 
-@class KnotModel;
+#import "KnotModel.h"
 @class KnotView;
 
 @interface KnotDocument : NSDocument
 {
-    KnotModel *model;
+    MutableKnotModel *model;
 
     IBOutlet KnotView *view;
 }
 
 @property(readonly) KnotModel *model;
+
+- (void) setSectionType: (char)type atX: (int)x atY: (int)y;
+
+- (void) setCornerType: (char)type atX: (int)x atY: (int)y;
 
 @end
 

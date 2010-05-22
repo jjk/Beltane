@@ -74,10 +74,10 @@ namespace
     CGFloat delta = 0.5 * sectionSize;
     NSBezierPath *path = [NSBezierPath bezierPath];
 
-    [path moveToPoint: NSMakePoint( selX * sectionSize,
-                                   -selY * sectionSize)];
+    [path moveToPoint: NSMakePoint(selX * sectionSize,
+                                   selY * sectionSize)];
     if (selCorner) {
-        [path relativeMoveToPoint: NSMakePoint(-delta, delta)];
+        [path relativeMoveToPoint: NSMakePoint(-delta, -delta)];
     }
 
     [path relativeMoveToPoint: NSMakePoint(0, delta)];
@@ -111,8 +111,8 @@ namespace
 
     for (int y = minY; y <= maxY; ++y) {
         for (int x = minX; x <= maxX; ++x) {
-            NSRect dest = NSMakeRect(( x - 0.5) * sectionSize,
-                                     (-y - 0.5) * sectionSize,
+            NSRect dest = NSMakeRect((x - 0.5) * sectionSize,
+                                     (y - 0.5) * sectionSize,
                                      sectionSize,
                                      sectionSize);
 
@@ -237,8 +237,8 @@ namespace
                              location.y - 0.5 * NSHeight(bounds));
 
     // Convert to skewed coordinates.
-    int d1 =  (int)round((pt.x - pt.y) / sectionSize);
-    int d2 = -(int)round((pt.x + pt.y) / sectionSize);
+    int d1 =  (int)round((pt.x + pt.y) / sectionSize);
+    int d2 = -(int)round((pt.x - pt.y) / sectionSize);
 
     if ((d1 + d2) % 2) {
         selX = (d1-d2+1) / 2;

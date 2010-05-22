@@ -140,10 +140,10 @@ namespace
         int dx = x - minX;
         int dy = y - minY;
         return KnotSection(sectionTypes[dy * self.width + dx],
-                           cornerTypes[(dy+0) * (self.width+1) + dx+0],
-                           cornerTypes[(dy+0) * (self.width+1) + dx+1],
                            cornerTypes[(dy+1) * (self.width+1) + dx+0],
-                           cornerTypes[(dy+1) * (self.width+1) + dx+1]);
+                           cornerTypes[(dy+1) * (self.width+1) + dx+1],
+                           cornerTypes[(dy+0) * (self.width+1) + dx+0],
+                           cornerTypes[(dy+0) * (self.width+1) + dx+1]);
     }
 
     // Outside the current bounds - return a dummy section.
@@ -154,13 +154,13 @@ namespace
 
 @implementation MutableKnotModel
 
-- (void) growLeft: (int)l right: (int)r top: (int)t bottom: (int)b
+- (void) growLeft: (int)l right: (int)r bottom: (int)b top: (int)t
 {
     int width = self.width;
     int height = self.height;
 
     int newWidth = width + l + r;
-    int newHeight = height + t + b;
+    int newHeight = height + b + t;
 
     int newSectionSize = newWidth * newHeight;
     char *newSectionTypes = new char[newSectionSize];
@@ -171,20 +171,20 @@ namespace
     memset(newCornerTypes, 'D', newCornerSize);
 
     for (int i = 0; i < height; ++i) {
-        memcpy(newSectionTypes + (i+t)*newWidth + l,
+        memcpy(newSectionTypes + (i+b)*newWidth + l,
                sectionTypes + i*width,
                width);
     }
     for (int i = 0; i <= height; ++i) {
-        memcpy(newCornerTypes + (i+t)*(newWidth+1) + l,
+        memcpy(newCornerTypes + (i+b)*(newWidth+1) + l,
                cornerTypes + i*(width+1),
                width+1);
     }
 
     minX -= l;
     maxX += r;
-    minY -= t;
-    maxY += b;
+    minY -= b;
+    maxY += t;
 
     delete [] sectionTypes;
     sectionTypes = newSectionTypes;
@@ -200,8 +200,8 @@ namespace
     if (x < minX || x > maxX || y < minY || y > maxY) {
         [self growLeft: max(0, minX - x)
                  right: max(0, x - maxX)
-                   top: max(0, minY - y)
-                bottom: max(0, y - maxY)];
+                bottom: max(0, minY - y)
+                   top: max(0, y - maxY)];
     }
 
     int dx = x - minX;
@@ -221,8 +221,8 @@ namespace
     if (x < minX || x > maxX+1 || y < minY || y > maxY+1) {
         [self growLeft: max(0, minX - x)
                  right: max(0, x - maxX - 1)
-                   top: max(0, minY - y)
-                bottom: max(0, y - maxY - 1)];
+                bottom: max(0, minY - y)
+                   top: max(0, y - maxY - 1)];
     }
 
     int dx = x - minX;

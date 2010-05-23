@@ -198,6 +198,33 @@ namespace
     [self setNeedsDisplay: YES];
 }
 
+- (void) moveCursorByX: (int)dx byY:(int)dy
+{
+    selX += dx;
+    selY += dy;
+    [self setNeedsDisplay: YES];
+}
+
+- (void) moveLeft: (id)sender
+{
+    [self moveCursorByX: -1 byY: 0];
+}
+
+- (void) moveRight: (id)sender
+{
+    [self moveCursorByX: 1 byY: 0];
+}
+
+- (void) moveDown: (id)sender
+{
+    [self moveCursorByX: 0 byY: -1];
+}
+
+- (void) moveUp: (id)sender
+{
+    [self moveCursorByX: 0 byY: 1];
+}
+
 - (void) keyDown: (NSEvent *)event
 {
     NSString *chars = [[event characters] uppercaseString];

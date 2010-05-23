@@ -143,7 +143,7 @@ namespace
     return ! (x < minX || x > maxX || y < minY || y > maxY);
 }
 
-- (KnotSection) getSectionAtX: (int)x atY: (int)y
+- (KnotSection) sectionAtX: (int)x atY: (int)y
 {
     if ([self hasSectionAtX: x atY: y]) {
         int dx = x - minX;

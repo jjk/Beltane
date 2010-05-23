@@ -40,7 +40,7 @@
 
 - (bool) hasSectionAtX: (int)x atY: (int)y;
 
-- (KnotSection) getSectionAtX: (int)x atY: (int)y;
+- (KnotSection) sectionAtX: (int)x atY: (int)y;
 
 @end
 

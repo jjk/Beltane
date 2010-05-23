@@ -115,7 +115,7 @@ namespace
             int sy = (y - model.minY) % model.height;
             sy = model.minY + sy + (sy < 0 ? model.height : 0);
 
-            [engine drawSection: [model getSectionAtX: sx atY: sy]
+            [engine drawSection: [model sectionAtX: sx atY: sy]
                          inRect: dest
                       operation: NSCompositeSourceOver
                        fraction: ([model hasSectionAtX: x atY: y]

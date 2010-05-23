@@ -89,6 +89,7 @@ namespace
                 memcpy(cornerTypes, bytes, length);
             } else {
                 // Invalid corner size.
+                delete [] sectionTypes;
                 return nil;
             }
         } else {
@@ -97,6 +98,14 @@ namespace
         }
     }
     return self;
+}
+
+- (void) finalize
+{
+    delete [] sectionTypes;
+    delete [] cornerTypes;
+
+    [super finalize];
 }
 
 - (void) encodeWithCoder: (NSCoder *)encoder

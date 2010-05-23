@@ -58,6 +58,9 @@ namespace
 {
     self = [super initWithFrame: frame];
     if (self) {
+        [self setBoundsOrigin: NSMakePoint(-0.5 * NSWidth(frame),
+                                           -0.5 * NSHeight(frame))];
+
         style = kpSlenderStyle;
         hollow = false;
         sectionSize = kInitialSectionSize;
@@ -94,20 +97,10 @@ namespace
     [[NSColor whiteColor] set];
     [NSBezierPath fillRect: dirtyRect];
 
-    NSRect bounds = [self bounds];
-    NSRect rect = NSOffsetRect(dirtyRect,
-                               -0.5 * NSWidth(bounds),
-                               -0.5 * NSHeight(bounds));
-
-    int minX = (int)floor(NSMinX(rect) / sectionSize);
-    int maxX = (int) ceil(NSMaxX(rect) / sectionSize);
-    int minY = (int)floor(NSMinY(rect) / sectionSize);
-    int maxY = (int) ceil(NSMaxY(rect) / sectionSize);
-
-    NSAffineTransform *xl = [NSAffineTransform transform];
-    [xl translateXBy: 0.5 * NSWidth(bounds)
-                 yBy: 0.5 * NSHeight(bounds)];
-    [xl concat];
+    int minX = (int)floor(NSMinX(dirtyRect) / sectionSize);
+    int maxX = (int) ceil(NSMaxX(dirtyRect) / sectionSize);
+    int minY = (int)floor(NSMinY(dirtyRect) / sectionSize);
+    int maxY = (int) ceil(NSMaxY(dirtyRect) / sectionSize);
 
     for (int y = minY; y <= maxY; ++y) {
         for (int x = minX; x <= maxX; ++x) {
@@ -232,13 +225,10 @@ namespace
 {
     NSPoint location = [self convertPoint: [event locationInWindow]
                                  fromView: nil];
-    NSRect bounds = [self bounds];
-    NSPoint pt = NSMakePoint(location.x - 0.5 * NSWidth(bounds),
-                             location.y - 0.5 * NSHeight(bounds));
 
     // Convert to skewed coordinates.
-    int d1 =  (int)round((pt.x + pt.y) / sectionSize);
-    int d2 = -(int)round((pt.x - pt.y) / sectionSize);
+    int d1 =  (int)round((location.x + location.y) / sectionSize);
+    int d2 = -(int)round((location.x - location.y) / sectionSize);
 
     if ((d1 + d2) % 2) {
         selX = (d1-d2+1) / 2;

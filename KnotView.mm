@@ -72,6 +72,18 @@ namespace
     return self;
 }
 
+- (void) setFrameSize: (NSSize)newSize
+{
+    NSRect oldBounds = [self bounds];
+
+    [super setFrameSize: newSize];
+
+    CGFloat midX = NSMidX(oldBounds);
+    CGFloat midY = NSMidY(oldBounds);
+    [self setBoundsOrigin: NSMakePoint(midX - 0.5 * newSize.width,
+                                       midY - 0.5 * newSize.height)];
+}
+
 - (NSBezierPath *) selectionPath
 {
     CGFloat delta = 0.5 * sectionSize;
@@ -176,26 +188,34 @@ namespace
     [self appearanceChanged];
 }
 
+- (void) zoomBy: (CGFloat)factor
+{
+    sectionSize = max(kMinimumSectionSize, factor * sectionSize);
+    [self setNeedsDisplay: YES];
+}
+
 - (IBAction) zoom: (id)sender
 {
     switch ([sender tag]) {
 
     case 0: // "Zoom In"
-        sectionSize *= kZoomFactor;
+        [self zoomBy: kZoomFactor];
         break;
 
     case 1: // "Zoom Out"
-        sectionSize = max(sectionSize / kZoomFactor, kMinimumSectionSize);
+        [self zoomBy: 1.0 / kZoomFactor];
         break;
     }
-    [self setNeedsDisplay: YES];
 }
 
 - (void) magnifyWithEvent: (NSEvent *)event
 {
-    sectionSize = max(sectionSize * (1.0 + [event magnification]),
-                      kMinimumSectionSize);
-    [self setNeedsDisplay: YES];
+    [self zoomBy: 1.0 + [event magnification]];
+}
+
+- (void) scrollWheel: (NSEvent *)event
+{
+    [self zoomBy: pow(kZoomFactor, 0.3 * [event deltaY])];
 }
 
 - (void) moveCursorByX: (int)dx byY:(int)dy
@@ -268,6 +288,14 @@ namespace
         selCorner = false;
     }
 
+    [self setNeedsDisplay: YES];
+}
+
+- (void) mouseDragged: (NSEvent *)event
+{
+    NSPoint origin = [self bounds].origin;
+    [self setBoundsOrigin: NSMakePoint(origin.x - [event deltaX],
+                                       origin.y + [event deltaY])];
     [self setNeedsDisplay: YES];
 }
 

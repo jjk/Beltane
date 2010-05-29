@@ -211,6 +211,7 @@ namespace
 - (void) zoomBy: (CGFloat)factor
 {
     sectionSize = max(kMinimumSectionSize, factor * sectionSize);
+    // TODO - recalculate bounds
     [self setNeedsDisplay: YES];
 }
 
@@ -236,6 +237,29 @@ namespace
 - (void) scrollWheel: (NSEvent *)event
 {
     [self zoomBy: pow(kZoomFactor, 0.3 * [event deltaY])];
+}
+
+- (IBAction) centerAndFit: (id)sender
+{
+    NSRect bounds = [self bounds];
+    CGFloat boundsWidth = NSWidth(bounds);
+    CGFloat boundsHeight = NSHeight(bounds);
+
+    KnotModel *model = document.model;
+    CGFloat sectionWidth = boundsWidth / (model.width + 1);
+    CGFloat sectionHeight = boundsHeight / (model.height + 1);
+    sectionSize = min(max(min(sectionWidth, sectionHeight),
+                          kMinimumSectionSize),
+                      kInitialSectionSize);
+
+    CGFloat dx = sectionSize * (model.minX - 0.5);
+    CGFloat dy = sectionSize * (model.minY - 0.5);
+    CGFloat w  = sectionSize * model.width;
+    CGFloat h  = sectionSize * model.height;
+
+    [self setBoundsOrigin: NSMakePoint(dx + 0.5 * (w - boundsWidth),
+                                       dy + 0.5 * (h - boundsHeight))];
+    [self setNeedsDisplay: YES];
 }
 
 - (void) moveCursorByX: (int)dx byY:(int)dy

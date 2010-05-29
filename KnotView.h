@@ -50,6 +50,7 @@ enum // Tiling flags
 - (IBAction) setTilingMode: (id)sender;
 - (IBAction) toggleStyle: (id)sender;
 - (IBAction) zoom: (id)sender;
+- (IBAction) centerAndFit: (id)sender;
 
 @end
 

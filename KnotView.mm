@@ -34,8 +34,10 @@ namespace
     const CGFloat kInitialSectionSize = 80.0;
     const CGFloat kMinimumSectionSize = 5;
 
-    KnotStyle *kpSlenderStyle;
-    KnotStyle *kpBroadStyle;
+    const KnotStyle *kpSlenderStyle;
+    const KnotStyle *kpBroadStyle;
+
+    const KnotSection kEmptySection('N', 'N', 'N', 'N', 'N');
 }
 
 @implementation KnotView
@@ -61,6 +63,7 @@ namespace
         [self setBoundsOrigin: NSMakePoint(-0.5 * NSWidth(frame),
                                            -0.5 * NSHeight(frame))];
 
+        tilingMode = HORIZONTAL | VERTICAL;
         style = kpSlenderStyle;
         hollow = false;
         sectionSize = kInitialSectionSize;
@@ -114,25 +117,36 @@ namespace
     int minY = (int)floor(NSMinY(dirtyRect) / sectionSize);
     int maxY = (int) ceil(NSMaxY(dirtyRect) / sectionSize);
 
+    KnotModel *model = document.model;
     for (int y = minY; y <= maxY; ++y) {
+        bool inY = y >= model.minY && y <= model.maxY;
+
         for (int x = minX; x <= maxX; ++x) {
+            bool inX = x >= model.minX && x <= model.maxX;
+
             NSRect dest = NSMakeRect((x - 0.5) * sectionSize,
                                      (y - 0.5) * sectionSize,
                                      sectionSize,
                                      sectionSize);
 
-            KnotModel *model = document.model;
-            int sx = (x - model.minX) % model.width;
-            sx = model.minX + sx + (sx < 0 ? model.width : 0);
-            int sy = (y - model.minY) % model.height;
-            sy = model.minY + sy + (sy < 0 ? model.height : 0);
+            if ((inX || (tilingMode & HORIZONTAL))
+                && (inY || (tilingMode & VERTICAL)))
+            {
+                int sx = (x - model.minX) % model.width;
+                sx = model.minX + sx + (sx < 0 ? model.width : 0);
+                int sy = (y - model.minY) % model.height;
+                sy = model.minY + sy + (sy < 0 ? model.height : 0);
 
-            [engine drawSection: [model sectionAtX: sx atY: sy]
-                         inRect: dest
-                      operation: NSCompositeSourceOver
-                       fraction: ([model hasSectionAtX: x atY: y]
-                                  ? 1.0
-                                  : 0.5)];
+                [engine drawSection: [model sectionAtX: sx atY: sy]
+                             inRect: dest
+                          operation: NSCompositeSourceOver
+                           fraction: ((inX && inY) ? 1.0 : 0.5)];
+            } else {
+                [engine drawSection: kEmptySection
+                             inRect: dest
+                          operation: NSCompositeSourceOver
+                           fraction: 0.5];
+            }
         }
     }
 
@@ -171,6 +185,12 @@ namespace
     }
 
     return YES;
+}
+
+- (IBAction) setTilingMode: (id)sender
+{
+    tilingMode = [[sender cell] tagForSegment: [sender selectedSegment]];
+    [self setNeedsDisplay: YES];
 }
 
 - (IBAction) toggleStyle: (id)sender;

@@ -27,13 +27,19 @@
 #include "KnotSection.h"
 @class KnotStyle;
 
+enum // Tiling flags
+{
+    HORIZONTAL = (1 << 0),
+    VERTICAL   = (1 << 1)
+};
+
 @interface KnotView : NSView
 {
     IBOutlet KnotDocument *document;
 
+    int tilingMode;
     KnotStyle *style;
     bool hollow;
-
     CGFloat sectionSize;
     KnotEngine *engine;
 
@@ -41,6 +47,7 @@
     bool selCorner;
 }
 
+- (IBAction) setTilingMode: (id)sender;
 - (IBAction) toggleStyle: (id)sender;
 - (IBAction) zoom: (id)sender;
 

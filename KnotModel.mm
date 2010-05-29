@@ -138,14 +138,9 @@ namespace
     return maxY - minY + 1;
 }
 
-- (bool) hasSectionAtX: (int)x atY: (int)y
-{
-    return ! (x < minX || x > maxX || y < minY || y > maxY);
-}
-
 - (KnotSection) sectionAtX: (int)x atY: (int)y
 {
-    if ([self hasSectionAtX: x atY: y]) {
+    if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
         int dx = x - minX;
         int dy = y - minY;
         return KnotSection(sectionTypes[dy * self.width + dx],

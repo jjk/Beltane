@@ -218,6 +218,16 @@ namespace
     [self setNeedsDisplay: YES];
 }
 
+- (IBAction) setStyle: (id)sender;
+{
+    int tag = [[sender cell] tagForSegment: [sender selectedSegment]];
+
+    style = (tag & BROAD) ? kpBroadStyle : kpSlenderStyle;
+    hollow = !!(tag & HOLLOW);
+
+    [self appearanceChanged];
+}
+
 - (IBAction) toggleStyle: (id)sender;
 {
     switch ([sender tag]) {

@@ -32,6 +32,11 @@ enum // Tiling flags
     HORIZONTAL = (1 << 0),
     VERTICAL   = (1 << 1)
 };
+enum // Knot styles
+{
+    BROAD  = (1 << 0),
+    HOLLOW = (1 << 1)
+};
 
 @interface KnotView : NSView
 {
@@ -48,6 +53,7 @@ enum // Tiling flags
 }
 
 - (IBAction) setTilingMode: (id)sender;
+- (IBAction) setStyle: (id)sender;
 - (IBAction) toggleStyle: (id)sender;
 - (IBAction) zoom: (id)sender;
 - (IBAction) centerAndFit: (id)sender;

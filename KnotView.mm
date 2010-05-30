@@ -31,7 +31,7 @@ using namespace ::std;
 namespace
 {
     const CGFloat kZoomFactor = 1.2;
-    const CGFloat kInitialSectionSize = 80.0;
+    const CGFloat kInitialSectionSize = 80;
     const CGFloat kMinimumSectionSize = 5;
 
     const KnotStyle *kpSlenderStyle;
@@ -71,6 +71,17 @@ namespace
 
         selX = selY = 0;
         selCorner = false;
+
+        [[NSNotificationCenter defaultCenter]
+         addObserver: self
+            selector: @selector(updateCursor:)
+                name: NSWindowDidBecomeKeyNotification
+              object: nil];
+        [[NSNotificationCenter defaultCenter]
+         addObserver: self
+            selector: @selector(updateCursor:)
+                name: NSWindowDidResignKeyNotification
+              object: nil];
     }
     return self;
 }
@@ -123,7 +134,6 @@ namespace
 
         for (int x = minX; x <= maxX; ++x) {
             bool inX = x >= model.minX && x <= model.maxX;
-
             NSRect dest = NSMakeRect((x - 0.5) * sectionSize,
                                      (y - 0.5) * sectionSize,
                                      sectionSize,
@@ -150,12 +160,27 @@ namespace
         }
     }
 
-    // TODO - draw cursor only when window is the key window
-    NSBezierPath *selPath = [self selectionPath];
-    [[NSColor colorWithCalibratedRed: 1.0 green: 0.6 blue: 0.6 alpha: 0.5] set];
-    [selPath fill];
-    [[NSColor colorWithCalibratedRed: 1.0 green: 0.0 blue: 0.0 alpha: 0.5] set];
-    [selPath stroke];
+    // Draw cursor only when window is the key window.
+    if ([[self window] isKeyWindow]) {
+        NSBezierPath *selPath = [self selectionPath];
+        [[NSColor colorWithCalibratedRed: 1.0
+                                   green: 0.6
+                                    blue: 0.6
+                                   alpha: 0.5] set];
+        [selPath fill];
+        [[NSColor colorWithCalibratedRed: 1.0
+                                   green: 0.0
+                                    blue: 0.0
+                                   alpha: 0.5] set];
+        [selPath stroke];
+    }
+}
+
+- (void) updateCursor: (NSNotification *)notification
+{
+    if ([notification object] == [self window]) {
+        [self setNeedsDisplayInRect: [[self selectionPath] bounds]];
+    }
 }
 
 - (BOOL) acceptsFirstResponder

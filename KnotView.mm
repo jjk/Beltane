@@ -228,21 +228,6 @@ namespace
     [self appearanceChanged];
 }
 
-- (IBAction) toggleStyle: (id)sender;
-{
-    switch ([sender tag]) {
-
-    case 0: // "Broad Strokes"
-        style = (style == kpSlenderStyle) ? kpBroadStyle : kpSlenderStyle;
-        break;
-
-    case 1: // "Hollow Strokes"
-        hollow = !hollow;
-        break;
-    }
-    [self appearanceChanged];
-}
-
 - (void) zoomBy: (CGFloat)factor
 {
     sectionSize = max(kMinimumSectionSize, factor * sectionSize);
@@ -252,7 +237,7 @@ namespace
 
 - (IBAction) zoom: (id)sender
 {
-    switch ([sender tag]) {
+    switch ([[sender cell] tagForSegment: [sender selectedSegment]]) {
 
     case 0: // "Zoom In"
         [self zoomBy: kZoomFactor];

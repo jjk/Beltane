@@ -54,7 +54,6 @@ enum // Knot styles
 
 - (IBAction) setTilingMode: (id)sender;
 - (IBAction) setStyle: (id)sender;
-- (IBAction) toggleStyle: (id)sender;
 - (IBAction) zoom: (id)sender;
 - (IBAction) centerAndFit: (id)sender;
 

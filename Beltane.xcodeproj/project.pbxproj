@@ -66,6 +66,7 @@
 		00EE7D78119DA7DE001EF433 /* KnotStyle.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EE7D72119DA7DE001EF433 /* KnotStyle.mm */; };
 		00EE7D79119DA7DE001EF433 /* Stroke.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EE7D75119DA7DE001EF433 /* Stroke.mm */; };
 		00EE7D7A119DA7DE001EF433 /* StrokeSet.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EE7D76119DA7DE001EF433 /* StrokeSet.mm */; };
+		00F3CB6C11B2C2DB00053118 /* slender-solid-small.png in Resources */ = {isa = PBXBuildFile; fileRef = 00F3CB6B11B2C2DB00053118 /* slender-solid-small.png */; };
 		1DDD582C0DA1D0D100B32029 /* KnotDocument.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58280DA1D0D100B32029 /* KnotDocument.xib */; };
 		1DDD582D0DA1D0D100B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD582A0DA1D0D100B32029 /* MainMenu.xib */; };
 		8D15AC2F0486D014006FF6A4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165FFE840EACC02AAC07 /* InfoPlist.strings */; };
@@ -141,6 +142,7 @@
 		00EE7D76119DA7DE001EF433 /* StrokeSet.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = StrokeSet.mm; sourceTree = "<group>"; };
 		00EE7D77119DA7DE001EF433 /* StrokeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StrokeSet.h; sourceTree = "<group>"; };
 		00EE7D8B119DABA5001EF433 /* KnotEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KnotEngine.h; sourceTree = "<group>"; };
+		00F3CB6B11B2C2DB00053118 /* slender-solid-small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "slender-solid-small.png"; path = "icons/slender-solid-small.png"; sourceTree = "<group>"; };
 		089C1660FE840EACC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FBA07B3F13500E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -223,6 +225,7 @@
 		00BF922511B2701F00E34D3B /* Icons */ = {
 			isa = PBXGroup;
 			children = (
+				00F3CB6B11B2C2DB00053118 /* slender-solid-small.png */,
 				00BF922711B270B300E34D3B /* broad-hollow.png */,
 				00BF922811B270B300E34D3B /* broad-solid.png */,
 				00BF922911B270B300E34D3B /* home.png */,
@@ -434,6 +437,7 @@
 				00BF923611B270B300E34D3B /* slender-solid.png in Resources */,
 				00BF923711B270B300E34D3B /* tiled.png in Resources */,
 				00BF923811B270B300E34D3B /* vertical.png in Resources */,
+				00F3CB6C11B2C2DB00053118 /* slender-solid-small.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

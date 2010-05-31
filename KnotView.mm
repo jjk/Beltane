@@ -230,8 +230,16 @@ namespace
 
 - (void) zoomBy: (CGFloat)factor
 {
-    sectionSize = max(kMinimumSectionSize, factor * sectionSize);
-    // TODO - recalculate bounds
+    NSRect bounds = [self bounds];
+    CGFloat newSectionSize = max(kMinimumSectionSize, factor * sectionSize);
+    CGFloat cx = NSMidX(bounds) * newSectionSize / sectionSize;
+    CGFloat cy = NSMidY(bounds) * newSectionSize / sectionSize;
+    CGFloat w = NSWidth(bounds);
+    CGFloat h = NSHeight(bounds);
+
+    sectionSize = newSectionSize;
+    [self setBounds: NSMakeRect(cx - 0.5 * w, cy - 0.5 * h, w, h)];
+
     [self setNeedsDisplay: YES];
 }
 

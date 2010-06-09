@@ -56,6 +56,14 @@ namespace
     return self;
 }
 
+- (void) drawErrorIndicatorAt: (NSPoint)point
+{
+    NSRect bounds = NSMakeRect(point.x - kSize * 0.25, point.y - kSize * 0.25,
+                               kSize * 0.5, kSize * 0.5);
+    [[NSColor magentaColor] setFill];
+    [[NSBezierPath bezierPathWithOvalInRect: bounds] fill];
+}
+
 - (void) drawStroke: (Stroke *)stroke
         transformed: (int)transformation
              inRect: (NSRect)rect
@@ -111,65 +119,65 @@ namespace
                             inRect: (NSRect)rect
                          operation: (NSCompositingOperation)op
 {
-    switch (4*from + to) {
+    switch ((from << 8) + to) {
 
-    case 4*'D' + 'D':
+    case ('D' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::DDD]
              transformed: (mirror ? 4 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'D' + 'H':
+    case ('D' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::DHD]
              transformed: (mirror ? 6 : 2)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'D' + 'V':
+    case ('D' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::DHD]
              transformed: (mirror ? 1 : 7)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'D':
+    case ('H' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::DHD]
              transformed: (mirror ? 4 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'H':
+    case ('H' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::DHH]
              transformed: (mirror ? 4 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'V':
+    case ('H' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::DHV]
              transformed: (mirror ? 4 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'D':
+    case ('V' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::DHD]
              transformed: (mirror ? 3 : 5)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'H':
+    case ('V' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::DHV]
              transformed: (mirror ? 6 : 2)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'V':
+    case ('V' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::DHH]
              transformed: (mirror ? 1 : 5)
                   inRect: rect
@@ -177,7 +185,9 @@ namespace
         break;
 
     default:
-        // TODO - draw some kind of error indication
+        // TODO - indicate actual problem.
+        [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
+                                                NSMidY(rect))];
         break;
     }
 }
@@ -228,77 +238,85 @@ namespace
                               inRect: (NSRect)rect
                            operation: (NSCompositingOperation)op
 {
-    switch (4*from + to) {
+    switch ((from << 8) + to) {
 
-    case 4*'D' + 'D':
+    case ('D' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::HDD]
              transformed: (mirror ? 2 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'D' + 'H':
+    case ('D' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::HDH]
              transformed: (mirror ? 6 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'D' + 'V':
+    case ('D' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::HDV]
              transformed: (mirror ? 6 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'D':
+    case ('H' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::HDH]
              transformed: (mirror ? 2 : 4)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'H':
+    case ('H' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::HHH]
              transformed: (mirror ? 2 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'V':
+    case ('H' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::HHV]
              transformed: (mirror ? 6 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'D':
+    case ('V' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::HDV]
              transformed: (mirror ? 2 : 4)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'H':
+    case ('V' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::HHV]
              transformed: (mirror ? 2 : 4)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'V':
+    case ('V' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::HVV]
              transformed: (mirror ? 2 : 0)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'N' + 'N':
-        // Stroke omitted (edge section).
+    case ('D' << 8) + 'N':
+    case ('H' << 8) + 'N':
+    case ('V' << 8) + 'N':
+    case ('N' << 8) + 'D':
+    case ('N' << 8) + 'H':
+    case ('N' << 8) + 'V':
+    case ('N' << 8) + 'N':
+        // Stroke omitted (edge or corner section).
         break;
 
     default:
-        // TODO - draw some kind of error indication
+        // TODO - indicate actual problem.
+        [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
+                                                NSMidY(rect))];
         break;
     }
 }
@@ -349,77 +367,85 @@ namespace
                             inRect: (NSRect)rect
                          operation: (NSCompositingOperation)op
 {
-    switch (4*from + to) {
+    switch ((from << 8) + to) {
 
-    case 4*'D' + 'D':
+    case ('D' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::HDD]
              transformed: (mirror ? 3 : 1)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'D' + 'H':
+    case ('D' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::HDV]
              transformed: (mirror ? 3 : 5)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'D' + 'V':
+    case ('D' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::HDH]
              transformed: (mirror ? 3 : 5)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'D':
+    case ('H' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::HDV]
              transformed: (mirror ? 7 : 1)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'H':
+    case ('H' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::HVV]
              transformed: (mirror ? 3 : 1)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'H' + 'V':
+    case ('H' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::HHV]
              transformed: (mirror ? 7 : 1)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'D':
+    case ('V' << 8) + 'D':
         [self drawStroke: [strokes strokeAt: Strokes::HDH]
              transformed: (mirror ? 7 : 1)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'H':
+    case ('V' << 8) + 'H':
         [self drawStroke: [strokes strokeAt: Strokes::HHV]
              transformed: (mirror ? 3 : 5)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'V' + 'V':
+    case ('V' << 8) + 'V':
         [self drawStroke: [strokes strokeAt: Strokes::HHH]
              transformed: (mirror ? 3 : 1)
                   inRect: rect
                operation: op];
         break;
 
-    case 4*'N' + 'N':
-        // Stroke omitted (edge section).
+    case ('D' << 8) + 'N':
+    case ('H' << 8) + 'N':
+    case ('V' << 8) + 'N':
+    case ('N' << 8) + 'D':
+    case ('N' << 8) + 'H':
+    case ('N' << 8) + 'V':
+    case ('N' << 8) + 'N':
+        // Stroke omitted (edge or corner section).
         break;
 
     default:
-        // TODO - draw some kind of error indication
+        // TODO - indicate actual problem.
+        [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
+                                                NSMidY(rect))];
         break;
     }
 }
@@ -503,8 +529,12 @@ namespace
             [self drawVerticalSection: section inRect: drawRect];
             break;
 
+        case 'N':
+            break;
+
         default:
-            // TODO - draw some kind of error indication
+            [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
+                                                    NSMidY(rect))];
             break;
         }
 

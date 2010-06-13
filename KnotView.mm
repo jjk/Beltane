@@ -188,30 +188,6 @@ namespace
     return YES;
 }
 
-- (BOOL) validateMenuItem: (NSMenuItem *)menuItem
-{
-    SEL action = [menuItem action];
-
-    if (action == @selector(toggleStyle:)) {
-        NSInteger state = NSOffState;
-
-        switch ([menuItem tag]) {
-
-        case 0: // "Broad Strokes"
-            state = (style == kpBroadStyle) ? NSOnState : NSOffState;
-            break;
-
-        case 1: // "Hollow Strokes"
-            state = hollow ? NSOnState : NSOffState;
-            break;
-        }
-
-        [menuItem setState: state];
-    }
-
-    return YES;
-}
-
 - (IBAction) setTilingMode: (id)sender
 {
     tilingMode = [[sender cell] tagForSegment: [sender selectedSegment]];

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00499174123E82F00076D316 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00499173123E82F00076D316 /* QuartzCore.framework */; };
 		00671F17119DCEFF0030788D /* KnotEngine.mm in Sources */ = {isa = PBXBuildFile; fileRef = 00EE7D70119DA7A9001EF433 /* KnotEngine.mm */; };
 		00731A4E119D464700AB0431 /* broad_fill_corner.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 00731A22119D464600AB0431 /* broad_fill_corner.pdf */; };
 		00731A4F119D464700AB0431 /* broad_fill_DDD.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 00731A23119D464600AB0431 /* broad_fill_DDD.pdf */; };
@@ -76,6 +77,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		00499173123E82F00076D316 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		00731A22119D464600AB0431 /* broad_fill_corner.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = broad_fill_corner.pdf; sourceTree = "<group>"; };
 		00731A23119D464600AB0431 /* broad_fill_DDD.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = broad_fill_DDD.pdf; sourceTree = "<group>"; };
 		00731A24119D464600AB0431 /* broad_fill_DHD.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = broad_fill_DHD.pdf; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D15AC340486D014006FF6A4 /* Cocoa.framework in Frameworks */,
+				00499174123E82F00076D316 /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,6 +262,7 @@
 			isa = PBXGroup;
 			children = (
 				1058C7A7FEA54F5311CA2CBB /* Cocoa.framework */,
+				00499173123E82F00076D316 /* QuartzCore.framework */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -366,7 +370,14 @@
 			isa = PBXProject;
 			buildConfigurationList = C05733CB08A9546B00998B17 /* Build configuration list for PBXProject "Beltane" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 2A37F4AAFDCFA73011CA2CEA /* Beltane */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -500,6 +511,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Beltane_Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Beltane-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = Beltane;
@@ -514,6 +526,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Beltane_Prefix.pch;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Beltane-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = Beltane;
@@ -527,6 +540,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_GC = required;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -541,6 +555,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_GC = required;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;

@@ -52,6 +52,8 @@ enum // Knot styles
     bool selCorner;
 }
 
+@property CGFloat sectionSize;
+
 - (IBAction) setTilingMode: (id)sender;
 - (IBAction) setStyle: (id)sender;
 - (IBAction) zoom: (id)sender;

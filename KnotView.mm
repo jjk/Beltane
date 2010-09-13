@@ -23,6 +23,8 @@
 #include <algorithm>
 using namespace ::std;
 
+#import <QuartzCore/CAAnimation.h>
+
 #import "KnotDocument.h"
 #import "KnotEngine.h"
 #import "KnotModel.h"
@@ -50,10 +52,32 @@ namespace
     }
 }
 
++ (id) defaultAnimationForKey: (NSString *)key
+{
+    if ([key isEqualToString: @"sectionSize"]) {
+        return [CABasicAnimation animation];
+    }
+
+    return [super defaultAnimationForKey:key];
+}
+
 - (void) appearanceChanged
 {
     engine = [[KnotEngine alloc] initWithStyle: style hollow: hollow];
     [self setNeedsDisplay: YES];
+}
+
+- (CGFloat) sectionSize
+{
+    return sectionSize;
+}
+
+- (void) setSectionSize: (CGFloat)newSize
+{
+    if (sectionSize != newSize) {
+        sectionSize = newSize;
+        [self appearanceChanged];
+    }
 }
 
 - (id) initWithFrame: (NSRect)frame
@@ -66,8 +90,7 @@ namespace
         tilingMode = HORIZONTAL | VERTICAL;
         style = kpSlenderStyle;
         hollow = false;
-        sectionSize = kInitialSectionSize;
-        [self appearanceChanged];
+        [self setSectionSize: kInitialSectionSize];
 
         selX = selY = 0;
         selCorner = false;
@@ -82,6 +105,8 @@ namespace
             selector: @selector(updateCursor:)
                 name: NSWindowDidResignKeyNotification
               object: nil];
+
+        [self setWantsLayer: YES];
     }
     return self;
 }
@@ -204,19 +229,18 @@ namespace
     [self appearanceChanged];
 }
 
-- (void) zoomBy: (CGFloat)factor
+static void zoomBy(id view, CGFloat factor)
 {
-    NSRect bounds = [self bounds];
-    CGFloat newSectionSize = max(kMinimumSectionSize, factor * sectionSize);
-    CGFloat cx = NSMidX(bounds) * newSectionSize / sectionSize;
-    CGFloat cy = NSMidY(bounds) * newSectionSize / sectionSize;
+    NSRect bounds = [view bounds];
+    CGFloat oldSectionSize = [view sectionSize];
+    CGFloat newSectionSize = max(kMinimumSectionSize, factor * oldSectionSize);
+    CGFloat cx = NSMidX(bounds) * newSectionSize / oldSectionSize;
+    CGFloat cy = NSMidY(bounds) * newSectionSize / oldSectionSize;
     CGFloat w = NSWidth(bounds);
     CGFloat h = NSHeight(bounds);
 
-    sectionSize = newSectionSize;
-    [self setBounds: NSMakeRect(cx - 0.5 * w, cy - 0.5 * h, w, h)];
-
-    [self setNeedsDisplay: YES];
+    [view setSectionSize: newSectionSize];
+    [view setBounds: NSMakeRect(cx - 0.5 * w, cy - 0.5 * h, w, h)];
 }
 
 - (IBAction) zoom: (id)sender
@@ -224,23 +248,25 @@ namespace
     switch ([[sender cell] tagForSegment: [sender selectedSegment]]) {
 
     case 0: // "Zoom In"
-        [self zoomBy: kZoomFactor];
+        zoomBy([self animator], kZoomFactor);
         break;
 
     case 1: // "Zoom Out"
-        [self zoomBy: 1.0 / kZoomFactor];
+        zoomBy([self animator], 1.0 / kZoomFactor);
         break;
     }
 }
 
 - (void) magnifyWithEvent: (NSEvent *)event
 {
-    [self zoomBy: 1.0 + [event magnification]];
+    // NB: We don't animate this.
+    zoomBy(self, 1.0 + [event magnification]);
 }
 
 - (void) scrollWheel: (NSEvent *)event
 {
-    [self zoomBy: pow(kZoomFactor, 0.3 * [event deltaY])];
+    // NB: We don't animate this either.
+    zoomBy(self, pow(kZoomFactor, 0.3 * [event deltaY]));
 }
 
 - (IBAction) centerAndFit: (id)sender
@@ -252,18 +278,18 @@ namespace
     KnotModel *model = document.model;
     CGFloat sectionWidth = boundsWidth / (model.width + 1);
     CGFloat sectionHeight = boundsHeight / (model.height + 1);
-    sectionSize = min(max(min(sectionWidth, sectionHeight),
-                          kMinimumSectionSize),
-                      kInitialSectionSize);
+    CGFloat newSectionSize = min(max(min(sectionWidth, sectionHeight),
+                                     kMinimumSectionSize),
+                                 kInitialSectionSize);
 
-    CGFloat dx = sectionSize * (model.minX - 0.5);
-    CGFloat dy = sectionSize * (model.minY - 0.5);
-    CGFloat w  = sectionSize * model.width;
-    CGFloat h  = sectionSize * model.height;
+    CGFloat dx = newSectionSize * (model.minX - 0.5);
+    CGFloat dy = newSectionSize * (model.minY - 0.5);
+    CGFloat w  = newSectionSize * model.width;
+    CGFloat h  = newSectionSize * model.height;
 
-    [self setBoundsOrigin: NSMakePoint(dx + 0.5 * (w - boundsWidth),
+    [[self animator] setSectionSize: newSectionSize];
+    [[self animator] setBoundsOrigin: NSMakePoint(dx + 0.5 * (w - boundsWidth),
                                        dy + 0.5 * (h - boundsHeight))];
-    [self setNeedsDisplay: YES];
 }
 
 - (void) moveCursorByX: (int)dx byY:(int)dy

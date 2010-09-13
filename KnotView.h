@@ -43,8 +43,7 @@ enum // Knot styles
     IBOutlet KnotDocument *document;
 
     int tilingMode;
-    KnotStyle *style;
-    bool hollow;
+    int style;
     CGFloat sectionSize;
     KnotEngine *engine;
 

@@ -63,7 +63,10 @@ namespace
 
 - (void) appearanceChanged
 {
-    engine = [[KnotEngine alloc] initWithStyle: style hollow: hollow];
+    KnotStyle *pStyle = (style & BROAD) ? kpBroadStyle : kpSlenderStyle;
+    bool hollow = !!(style & HOLLOW);
+    engine = [[KnotEngine alloc] initWithStyle: pStyle hollow: hollow];
+
     [self setNeedsDisplay: YES];
 }
 
@@ -88,8 +91,7 @@ namespace
                                            -0.5 * NSHeight(frame))];
 
         tilingMode = HORIZONTAL | VERTICAL;
-        style = kpSlenderStyle;
-        hollow = false;
+        style = 0;
         [self setSectionSize: kInitialSectionSize];
 
         selX = selY = 0;
@@ -221,11 +223,7 @@ namespace
 
 - (IBAction) setStyle: (id)sender;
 {
-    int tag = [[sender cell] tagForSegment: [sender selectedSegment]];
-
-    style = (tag & BROAD) ? kpBroadStyle : kpSlenderStyle;
-    hollow = !!(tag & HOLLOW);
-
+    style = [[sender cell] tagForSegment: [sender selectedSegment]];
     [self appearanceChanged];
 }
 

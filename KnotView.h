@@ -44,14 +44,11 @@ enum // Knot styles
 
     int tilingMode;
     int style;
-    CGFloat sectionSize;
     KnotEngine *engine;
 
     int selX, selY;
     bool selCorner;
 }
-
-@property CGFloat sectionSize;
 
 - (IBAction) setTilingMode: (id)sender;
 - (IBAction) setStyle: (id)sender;

@@ -32,9 +32,10 @@ using namespace ::std;
 
 namespace
 {
-    const CGFloat kZoomFactor = 1.2;
-    const CGFloat kInitialSectionSize = 80;
-    const CGFloat kMinimumSectionSize = 5;
+    const CGFloat kSectionSize = 80;
+    const CGFloat kMinimumDisplayedSectionSize = 5;
+    const CGFloat kMaxZoom = kSectionSize / kMinimumDisplayedSectionSize;
+    const CGFloat kZoomFactor = 1.6;
 
     const KnotStyle *kpSlenderStyle;
     const KnotStyle *kpBroadStyle;
@@ -52,15 +53,6 @@ namespace
     }
 }
 
-+ (id) defaultAnimationForKey: (NSString *)key
-{
-    if ([key isEqualToString: @"sectionSize"]) {
-        return [CABasicAnimation animation];
-    }
-
-    return [super defaultAnimationForKey:key];
-}
-
 - (void) appearanceChanged
 {
     KnotStyle *pStyle = (style & BROAD) ? kpBroadStyle : kpSlenderStyle;
@@ -68,19 +60,6 @@ namespace
     engine = [[KnotEngine alloc] initWithStyle: pStyle hollow: hollow];
 
     [self setNeedsDisplay: YES];
-}
-
-- (CGFloat) sectionSize
-{
-    return sectionSize;
-}
-
-- (void) setSectionSize: (CGFloat)newSize
-{
-    if (sectionSize != newSize) {
-        sectionSize = newSize;
-        [self appearanceChanged];
-    }
 }
 
 - (id) initWithFrame: (NSRect)frame
@@ -92,7 +71,7 @@ namespace
 
         tilingMode = HORIZONTAL | VERTICAL;
         style = 0;
-        [self setSectionSize: kInitialSectionSize];
+        [self appearanceChanged];
 
         selX = selY = 0;
         selCorner = false;
@@ -113,25 +92,15 @@ namespace
     return self;
 }
 
-- (void) setFrameSize: (NSSize)newSize
-{
-    NSRect oldBounds = [self bounds];
-
-    [super setFrameSize: newSize];
-
-    CGFloat midX = NSMidX(oldBounds);
-    CGFloat midY = NSMidY(oldBounds);
-    [self setBoundsOrigin: NSMakePoint(midX - 0.5 * newSize.width,
-                                       midY - 0.5 * newSize.height)];
-}
+#pragma mark Drawing
 
 - (NSBezierPath *) selectionPath
 {
-    CGFloat delta = 0.5 * sectionSize;
+    CGFloat delta = 0.5 * kSectionSize;
     NSBezierPath *path = [NSBezierPath bezierPath];
 
-    [path moveToPoint: NSMakePoint(selX * sectionSize,
-                                   selY * sectionSize)];
+    [path moveToPoint: NSMakePoint(selX * kSectionSize,
+                                   selY * kSectionSize)];
     if (selCorner) {
         [path relativeMoveToPoint: NSMakePoint(-delta, -delta)];
     }
@@ -150,10 +119,10 @@ namespace
     [[NSColor whiteColor] set];
     [NSBezierPath fillRect: dirtyRect];
 
-    int minX = (int)floor(NSMinX(dirtyRect) / sectionSize);
-    int maxX = (int) ceil(NSMaxX(dirtyRect) / sectionSize);
-    int minY = (int)floor(NSMinY(dirtyRect) / sectionSize);
-    int maxY = (int) ceil(NSMaxY(dirtyRect) / sectionSize);
+    int minX = (int)floor(NSMinX(dirtyRect) / kSectionSize);
+    int maxX = (int) ceil(NSMaxX(dirtyRect) / kSectionSize);
+    int minY = (int)floor(NSMinY(dirtyRect) / kSectionSize);
+    int maxY = (int) ceil(NSMaxY(dirtyRect) / kSectionSize);
 
     KnotModel *model = document.model;
     for (int y = minY; y <= maxY; ++y) {
@@ -161,10 +130,11 @@ namespace
 
         for (int x = minX; x <= maxX; ++x) {
             bool inX = x >= model.minX && x <= model.maxX;
-            NSRect dest = NSMakeRect((x - 0.5) * sectionSize,
-                                     (y - 0.5) * sectionSize,
-                                     sectionSize,
-                                     sectionSize);
+            NSRect dest = NSMakeRect((x - 0.5) * kSectionSize,
+                                     (y - 0.5) * kSectionSize,
+                                     kSectionSize,
+                                     kSectionSize);
+            dest = [self centerScanRect: dest];
 
             if ((inX || (tilingMode & HORIZONTAL))
                 && (inY || (tilingMode & VERTICAL)))
@@ -203,17 +173,7 @@ namespace
     }
 }
 
-- (void) updateCursor: (NSNotification *)notification
-{
-    if ([notification object] == [self window]) {
-        [self setNeedsDisplayInRect: [[self selectionPath] bounds]];
-    }
-}
-
-- (BOOL) acceptsFirstResponder
-{
-    return YES;
-}
+#pragma mark UI Actions
 
 - (IBAction) setTilingMode: (id)sender
 {
@@ -227,18 +187,31 @@ namespace
     [self appearanceChanged];
 }
 
+#pragma mark Resizing, Zooming and Panning
+
+- (void) setFrameSize: (NSSize)newSize
+{
+    NSRect bounds= [self bounds];
+
+    [super setFrameSize: newSize];
+    newSize = [self convertSize: newSize fromView: nil];
+
+    [self setBoundsOrigin: NSMakePoint(NSMidX(bounds) - 0.5 * newSize.width,
+                                       NSMidY(bounds) - 0.5 * newSize.height)];
+}
+
 static void zoomBy(id view, CGFloat factor)
 {
+    NSRect frame = [view frame];
     NSRect bounds = [view bounds];
-    CGFloat oldSectionSize = [view sectionSize];
-    CGFloat newSectionSize = max(kMinimumSectionSize, factor * oldSectionSize);
-    CGFloat cx = NSMidX(bounds) * newSectionSize / oldSectionSize;
-    CGFloat cy = NSMidY(bounds) * newSectionSize / oldSectionSize;
-    CGFloat w = NSWidth(bounds);
-    CGFloat h = NSHeight(bounds);
+    CGFloat newZoom = min(kMaxZoom, NSWidth(bounds) / NSWidth(frame) / factor);
+    CGFloat newWidth = NSWidth(frame) * newZoom;
+    CGFloat newHeight = NSHeight(frame) * newZoom;
 
-    [view setSectionSize: newSectionSize];
-    [view setBounds: NSMakeRect(cx - 0.5 * w, cy - 0.5 * h, w, h)];
+    [view setBounds: NSMakeRect(NSMidX(bounds) - 0.5 * newWidth,
+                                NSMidY(bounds) - 0.5 * newHeight,
+                                newWidth,
+                                newHeight)];
 }
 
 - (IBAction) zoom: (id)sender
@@ -267,27 +240,48 @@ static void zoomBy(id view, CGFloat factor)
     zoomBy(self, pow(kZoomFactor, 0.3 * [event deltaY]));
 }
 
+- (void) mouseDragged: (NSEvent *)event
+{
+    NSPoint origin = [self convertPoint: [self bounds].origin toView: nil];
+    origin = NSMakePoint(origin.x - [event deltaX], origin.y + [event deltaY]);
+
+    // NB: And neither do we try to animate this.
+    [self setBoundsOrigin: [self convertPoint: origin fromView: nil]];
+}
+
 - (IBAction) centerAndFit: (id)sender
 {
-    NSRect bounds = [self bounds];
-    CGFloat boundsWidth = NSWidth(bounds);
-    CGFloat boundsHeight = NSHeight(bounds);
-
+    NSRect frame = [self frame];
     KnotModel *model = document.model;
-    CGFloat sectionWidth = boundsWidth / (model.width + 1);
-    CGFloat sectionHeight = boundsHeight / (model.height + 1);
-    CGFloat newSectionSize = min(max(min(sectionWidth, sectionHeight),
-                                     kMinimumSectionSize),
-                                 kInitialSectionSize);
+    CGFloat sectionWidth = NSWidth(frame) / (model.width + 1);
+    CGFloat sectionHeight = NSHeight(frame) / (model.height + 1);
+    CGFloat newZoom = max(kSectionSize / max(min(sectionWidth, sectionHeight),
+                                             kMinimumDisplayedSectionSize),
+                          1.0);
+    CGFloat newWidth = NSWidth(frame) * newZoom;
+    CGFloat newHeight = NSHeight(frame) * newZoom;
 
-    CGFloat dx = newSectionSize * (model.minX - 0.5);
-    CGFloat dy = newSectionSize * (model.minY - 0.5);
-    CGFloat w  = newSectionSize * model.width;
-    CGFloat h  = newSectionSize * model.height;
+    CGFloat midX = kSectionSize * (model.minX + (model.width - 1) * 0.5);
+    CGFloat midY = kSectionSize * (model.minY + (model.height - 1) * 0.5);
 
-    [[self animator] setSectionSize: newSectionSize];
-    [[self animator] setBoundsOrigin: NSMakePoint(dx + 0.5 * (w - boundsWidth),
-                                       dy + 0.5 * (h - boundsHeight))];
+    [[self animator] setBounds: NSMakeRect(midX - 0.5 * newWidth,
+                                           midY - 0.5 * newHeight,
+                                           newWidth,
+                                           newHeight)];
+}
+
+#pragma mark Cursor Movement and Editing
+
+- (BOOL) acceptsFirstResponder
+{
+    return YES;
+}
+
+- (void) updateCursor: (NSNotification *)notification
+{
+    if ([notification object] == [self window]) {
+        [self setNeedsDisplayInRect: [[self selectionPath] bounds]];
+    }
 }
 
 - (void) moveCursorByX: (int)dx byY:(int)dy
@@ -317,6 +311,29 @@ static void zoomBy(id view, CGFloat factor)
     [self moveCursorByX: 0 byY: 1];
 }
 
+- (void) mouseDown: (NSEvent *)event
+{
+    NSPoint location = [self convertPoint: [event locationInWindow]
+                                 fromView: nil];
+
+    // Convert to skewed coordinates.
+    int d1 =  (int)round((location.x + location.y) / kSectionSize);
+    int d2 = -(int)round((location.x - location.y) / kSectionSize);
+
+    if ((d1 + d2) % 2) {
+        selX = (d1-d2+1) / 2;
+        selY = (d1+d2+1) / 2;
+        selCorner = true;
+
+    } else {
+        selX = (d1-d2) / 2;
+        selY = (d1+d2) / 2;
+        selCorner = false;
+    }
+
+    [self setNeedsDisplay: YES];
+}
+
 - (void) keyDown: (NSEvent *)event
 {
     NSString *chars = [[event characters] uppercaseString];
@@ -338,37 +355,6 @@ static void zoomBy(id view, CGFloat factor)
     }
 
     [super keyDown: event];
-}
-
-- (void) mouseDown: (NSEvent *)event
-{
-    NSPoint location = [self convertPoint: [event locationInWindow]
-                                 fromView: nil];
-
-    // Convert to skewed coordinates.
-    int d1 =  (int)round((location.x + location.y) / sectionSize);
-    int d2 = -(int)round((location.x - location.y) / sectionSize);
-
-    if ((d1 + d2) % 2) {
-        selX = (d1-d2+1) / 2;
-        selY = (d1+d2+1) / 2;
-        selCorner = true;
-
-    } else {
-        selX = (d1-d2) / 2;
-        selY = (d1+d2) / 2;
-        selCorner = false;
-    }
-
-    [self setNeedsDisplay: YES];
-}
-
-- (void) mouseDragged: (NSEvent *)event
-{
-    NSPoint origin = [self bounds].origin;
-    [self setBoundsOrigin: NSMakePoint(origin.x - [event deltaX],
-                                       origin.y + [event deltaY])];
-    [self setNeedsDisplay: YES];
 }
 
 @end

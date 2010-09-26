@@ -92,6 +92,11 @@ namespace
     return self;
 }
 
+- (KnotEngine *) engine
+{
+    return engine;
+}
+
 #pragma mark Drawing
 
 - (NSBezierPath *) selectionPath
@@ -134,7 +139,9 @@ namespace
                                      (y - 0.5) * kSectionSize,
                                      kSectionSize,
                                      kSectionSize);
+
             dest = [self centerScanRect: dest];
+            NSSize pixelSize = [self convertSizeToBase: dest.size];
 
             if ((inX || (tilingMode & HORIZONTAL))
                 && (inY || (tilingMode & VERTICAL)))
@@ -146,11 +153,13 @@ namespace
 
                 [engine drawSection: [model sectionAtX: sx atY: sy]
                              inRect: dest
+                       sizeInPixels: pixelSize
                           operation: NSCompositeSourceOver
                            fraction: ((inX && inY) ? 1.0 : 0.5)];
             } else {
                 [engine drawSection: kEmptySection
                              inRect: dest
+                       sizeInPixels: pixelSize
                           operation: NSCompositeSourceOver
                            fraction: 0.5];
             }
@@ -212,6 +221,7 @@ static void zoomBy(id view, CGFloat factor)
                                 NSMidY(bounds) - 0.5 * newHeight,
                                 newWidth,
                                 newHeight)];
+    [[view engine] flushCache];
 }
 
 - (IBAction) zoom: (id)sender
@@ -268,6 +278,7 @@ static void zoomBy(id view, CGFloat factor)
                                            midY - 0.5 * newHeight,
                                            newWidth,
                                            newHeight)];
+    [engine flushCache];
 }
 
 #pragma mark Cursor Movement and Editing

@@ -26,9 +26,6 @@
 
 namespace
 {
-    // Size of generated images.
-    const CGFloat kSize = 512;
-
     // Transformations.
     const NSAffineTransformStruct kTransformation[8] = {
         {  1,  0,  0,  1,  0,  0 },
@@ -56,12 +53,12 @@ namespace
     return self;
 }
 
-- (void) drawErrorIndicatorAt: (NSPoint)point
+- (void) drawErrorIndicatorInRect: (NSRect)rect
 {
-    NSRect bounds = NSMakeRect(point.x - kSize * 0.25, point.y - kSize * 0.25,
-                               kSize * 0.5, kSize * 0.5);
+    rect = NSInsetRect(rect, 0.25 * NSWidth(rect), 0.25 * NSHeight(rect));
+
     [[NSColor magentaColor] setFill];
-    [[NSBezierPath bezierPathWithOvalInRect: bounds] fill];
+    [[NSBezierPath bezierPathWithOvalInRect: rect] fill];
 }
 
 - (void) drawStroke: (Stroke *)stroke
@@ -186,8 +183,7 @@ namespace
 
     default:
         // TODO - indicate actual problem.
-        [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
-                                                NSMidY(rect))];
+        [self drawErrorIndicatorInRect: rect];
         break;
     }
 }
@@ -315,8 +311,7 @@ namespace
 
     default:
         // TODO - indicate actual problem.
-        [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
-                                                NSMidY(rect))];
+        [self drawErrorIndicatorInRect: rect];
         break;
     }
 }
@@ -444,8 +439,7 @@ namespace
 
     default:
         // TODO - indicate actual problem.
-        [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
-                                                NSMidY(rect))];
+        [self drawErrorIndicatorInRect: rect];
         break;
     }
 }
@@ -491,28 +485,32 @@ namespace
 
 - (void) drawSection: (const KnotSection &)section
               inRect: (NSRect)rect
+        sizeInPixels: (NSSize)pixelSize
            operation: (NSCompositingOperation)op
             fraction: (CGFloat)delta
 {
-    NSString *key = [NSString stringWithUTF8String: section.id()];
+    NSString *key = [NSString stringWithFormat: @"%s %dx%d",
+                     section.id(),
+                     (int)pixelSize.width, (int)pixelSize.height];
     NSImage *pImage = [mpCache valueForKey: key];
 
     if (!pImage) {
         // Create the image.
-        NSRect imageBounds = NSMakeRect(0, 0, kSize, kSize);
-        pImage = [[NSImage alloc] initWithSize: imageBounds.size];
+        pImage = [[NSImage alloc] initWithSize: pixelSize];
         [pImage lockFocus];
 
+        NSRect imageBounds = { NSZeroPoint, pixelSize };
         [[NSColor brownColor] set];
         [NSBezierPath fillRect: NSInsetRect(imageBounds, 1, 1)];
 
         // We want our origin to be in the center of the image.
-        CGFloat offset = 0.5 * kSize;
+        CGFloat xOffset = 0.5 * pixelSize.width;
+        CGFloat yOffset = 0.5 * pixelSize.height;
         NSAffineTransform *t = [NSAffineTransform transform];
-        [t translateXBy: offset yBy: offset];
+        [t translateXBy: xOffset yBy: yOffset];
         [t concat];
 
-        NSRect drawRect = NSOffsetRect(imageBounds, -offset, -offset);
+        NSRect drawRect = NSOffsetRect(imageBounds, -xOffset, -yOffset);
 
         // Draw the contents of the section.
         switch (section.type()) {
@@ -533,8 +531,7 @@ namespace
             break;
 
         default:
-            [self drawErrorIndicatorAt: NSMakePoint(NSMidX(rect),
-                                                    NSMidY(rect))];
+            [self drawErrorIndicatorInRect: rect];
             break;
         }
 
@@ -549,6 +546,11 @@ namespace
               fromRect: NSZeroRect
              operation: op
               fraction: delta];
+}
+
+- (void) flushCache
+{
+    [mpCache removeAllObjects];
 }
 
 @end

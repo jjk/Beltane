@@ -37,8 +37,11 @@
 
 - (void) drawSection: (const KnotSection &)section
               inRect: (NSRect)rect
+        sizeInPixels: (NSSize)pixelSize
            operation: (NSCompositingOperation)op
             fraction: (CGFloat)delta;
+
+- (void) flushCache;
 
 @end
 

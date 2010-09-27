@@ -99,6 +99,11 @@ namespace
 
 #pragma mark Drawing
 
+- (BOOL) isOpaque
+{
+    return YES;
+}
+
 - (NSBezierPath *) selectionPath
 {
     CGFloat delta = 0.5 * kSectionSize;

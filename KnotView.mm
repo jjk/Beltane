@@ -32,10 +32,9 @@ using namespace ::std;
 
 namespace
 {
-    const CGFloat kSectionSize = 80;
-    const CGFloat kMinimumDisplayedSectionSize = 5;
-    const CGFloat kMaxZoom = kSectionSize / kMinimumDisplayedSectionSize;
     const CGFloat kZoomFactor = 1.6;
+    const CGFloat kInitialSectionSize = 80;
+    const CGFloat kMinimumSectionSize = 8;
 
     const KnotStyle *kpSlenderStyle;
     const KnotStyle *kpBroadStyle;
@@ -53,6 +52,15 @@ namespace
     }
 }
 
++ (id) defaultAnimationForKey: (NSString *)key
+{
+    if ([key isEqualToString: @"sectionSize"]) {
+        return [CABasicAnimation animation];
+    }
+
+    return [super defaultAnimationForKey:key];
+}
+
 - (void) appearanceChanged
 {
     KnotStyle *pStyle = (style & BROAD) ? kpBroadStyle : kpSlenderStyle;
@@ -60,6 +68,20 @@ namespace
     engine = [[KnotEngine alloc] initWithStyle: pStyle hollow: hollow];
 
     [self setNeedsDisplay: YES];
+}
+
+- (CGFloat) sectionSize
+{
+    return sectionSize;
+}
+
+- (void) setSectionSize: (CGFloat)newSize
+{
+    if (sectionSize != newSize) {
+        sectionSize = newSize;
+        [engine flushCache];
+        [self setNeedsDisplay: YES];
+    }
 }
 
 - (id) initWithFrame: (NSRect)frame
@@ -71,6 +93,7 @@ namespace
 
         tilingMode = HORIZONTAL | VERTICAL;
         style = 0;
+        sectionSize = kInitialSectionSize;
         [self appearanceChanged];
 
         selX = selY = 0;
@@ -92,11 +115,6 @@ namespace
     return self;
 }
 
-- (KnotEngine *) engine
-{
-    return engine;
-}
-
 #pragma mark Drawing
 
 - (BOOL) isOpaque
@@ -106,11 +124,11 @@ namespace
 
 - (NSBezierPath *) selectionPath
 {
-    CGFloat delta = 0.5 * kSectionSize;
+    CGFloat delta = 0.5 * sectionSize;
     NSBezierPath *path = [NSBezierPath bezierPath];
 
-    [path moveToPoint: NSMakePoint(selX * kSectionSize,
-                                   selY * kSectionSize)];
+    [path moveToPoint: NSMakePoint(selX * sectionSize,
+                                   selY * sectionSize)];
     if (selCorner) {
         [path relativeMoveToPoint: NSMakePoint(-delta, -delta)];
     }
@@ -129,10 +147,12 @@ namespace
     [[NSColor whiteColor] set];
     [NSBezierPath fillRect: dirtyRect];
 
-    int minX = (int)floor(NSMinX(dirtyRect) / kSectionSize);
-    int maxX = (int) ceil(NSMaxX(dirtyRect) / kSectionSize);
-    int minY = (int)floor(NSMinY(dirtyRect) / kSectionSize);
-    int maxY = (int) ceil(NSMaxY(dirtyRect) / kSectionSize);
+    int minX = (int)floor(NSMinX(dirtyRect) / sectionSize);
+    int maxX = (int) ceil(NSMaxX(dirtyRect) / sectionSize);
+    int minY = (int)floor(NSMinY(dirtyRect) / sectionSize);
+    int maxY = (int) ceil(NSMaxY(dirtyRect) / sectionSize);
+
+    NSSize pixelSize = NSMakeSize(sectionSize, sectionSize);
 
     KnotModel *model = document.model;
     for (int y = minY; y <= maxY; ++y) {
@@ -140,13 +160,10 @@ namespace
 
         for (int x = minX; x <= maxX; ++x) {
             bool inX = x >= model.minX && x <= model.maxX;
-            NSRect dest = NSMakeRect((x - 0.5) * kSectionSize,
-                                     (y - 0.5) * kSectionSize,
-                                     kSectionSize,
-                                     kSectionSize);
-
-            dest = [self centerScanRect: dest];
-            NSSize pixelSize = [self convertSizeToBase: dest.size];
+            NSRect dest = NSMakeRect((x - 0.5) * sectionSize,
+                                     (y - 0.5) * sectionSize,
+                                     sectionSize,
+                                     sectionSize);
 
             if ((inX || (tilingMode & HORIZONTAL))
                 && (inY || (tilingMode & VERTICAL)))
@@ -205,28 +222,27 @@ namespace
 
 - (void) setFrameSize: (NSSize)newSize
 {
-    NSRect bounds= [self bounds];
+    NSRect bounds = [self bounds];
+    NSPoint origin = NSMakePoint(NSMidX(bounds) - 0.5 * newSize.width,
+                                 NSMidY(bounds) - 0.5 * newSize.height);
 
     [super setFrameSize: newSize];
-    newSize = [self convertSize: newSize fromView: nil];
-
-    [self setBoundsOrigin: NSMakePoint(NSMidX(bounds) - 0.5 * newSize.width,
-                                       NSMidY(bounds) - 0.5 * newSize.height)];
+    [self setBoundsOrigin: origin];
 }
 
 static void zoomBy(id view, CGFloat factor)
 {
-    NSRect frame = [view frame];
-    NSRect bounds = [view bounds];
-    CGFloat newZoom = min(kMaxZoom, NSWidth(bounds) / NSWidth(frame) / factor);
-    CGFloat newWidth = NSWidth(frame) * newZoom;
-    CGFloat newHeight = NSHeight(frame) * newZoom;
+    CGFloat oldSectionSize = [view sectionSize];
+    CGFloat newSectionSize = max(kMinimumSectionSize, factor * oldSectionSize);
 
-    [view setBounds: NSMakeRect(NSMidX(bounds) - 0.5 * newWidth,
-                                NSMidY(bounds) - 0.5 * newHeight,
-                                newWidth,
-                                newHeight)];
-    [[view engine] flushCache];
+    NSRect bounds = [view bounds];
+    CGFloat cx = NSMidX(bounds) * newSectionSize / oldSectionSize;
+    CGFloat cy = NSMidY(bounds) * newSectionSize / oldSectionSize;
+    NSPoint origin = NSMakePoint(cx - 0.5 * NSWidth(bounds),
+                                 cy - 0.5 * NSHeight(bounds));
+
+    [view setSectionSize: newSectionSize];
+    [view setBoundsOrigin: origin];
 }
 
 - (IBAction) zoom: (id)sender
@@ -257,33 +273,36 @@ static void zoomBy(id view, CGFloat factor)
 
 - (void) mouseDragged: (NSEvent *)event
 {
-    NSPoint origin = [self convertPoint: [self bounds].origin toView: nil];
-    origin = NSMakePoint(origin.x - [event deltaX], origin.y + [event deltaY]);
+    NSPoint origin = [self bounds].origin;
+    origin.x -= [event deltaX];
+    origin.y += [event deltaY];
 
     // NB: And neither do we try to animate this.
-    [self setBoundsOrigin: [self convertPoint: origin fromView: nil]];
+    [self setBoundsOrigin: origin];
 }
 
 - (IBAction) centerAndFit: (id)sender
 {
-    NSRect frame = [self frame];
+    NSRect bounds = [self bounds];
+    CGFloat boundsWidth = NSWidth(bounds);
+    CGFloat boundsHeight = NSHeight(bounds);
+
     KnotModel *model = document.model;
-    CGFloat sectionWidth = NSWidth(frame) / (model.width + 1);
-    CGFloat sectionHeight = NSHeight(frame) / (model.height + 1);
-    CGFloat newZoom = max(kSectionSize / max(min(sectionWidth, sectionHeight),
-                                             kMinimumDisplayedSectionSize),
-                          1.0);
-    CGFloat newWidth = NSWidth(frame) * newZoom;
-    CGFloat newHeight = NSHeight(frame) * newZoom;
+    CGFloat sectionWidth = boundsWidth / (model.width + 1);
+    CGFloat sectionHeight = boundsHeight / (model.height + 1);
+    CGFloat newSectionSize = min(max(min(sectionWidth, sectionHeight),
+                                     kMinimumSectionSize),
+                                 kInitialSectionSize);
 
-    CGFloat midX = kSectionSize * (model.minX + (model.width - 1) * 0.5);
-    CGFloat midY = kSectionSize * (model.minY + (model.height - 1) * 0.5);
+    CGFloat dx = newSectionSize * (model.minX - 0.5);
+    CGFloat dy = newSectionSize * (model.minY - 0.5);
+    CGFloat w  = newSectionSize * model.width;
+    CGFloat h  = newSectionSize * model.height;
+    NSPoint origin = NSMakePoint(dx + 0.5 * (w - boundsWidth),
+                                 dy + 0.5 * (h - boundsHeight));
 
-    [[self animator] setBounds: NSMakeRect(midX - 0.5 * newWidth,
-                                           midY - 0.5 * newHeight,
-                                           newWidth,
-                                           newHeight)];
-    [engine flushCache];
+    [[self animator] setSectionSize: newSectionSize];
+    [[self animator] setBoundsOrigin: origin];
 }
 
 #pragma mark Cursor Movement and Editing
@@ -333,8 +352,8 @@ static void zoomBy(id view, CGFloat factor)
                                  fromView: nil];
 
     // Convert to skewed coordinates.
-    int d1 =  (int)round((location.x + location.y) / kSectionSize);
-    int d2 = -(int)round((location.x - location.y) / kSectionSize);
+    int d1 =  (int)round((location.x + location.y) / sectionSize);
+    int d2 = -(int)round((location.x - location.y) / sectionSize);
 
     if ((d1 + d2) % 2) {
         selX = (d1-d2+1) / 2;
